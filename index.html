@@ -200,11 +200,46 @@
 
     <script>
         let seconds = 0;
-        let timerInterval;
+        let startTime = 0;
+        let startSeconds = 0;
+        let targetMinutes = [];
+        let lastAnnouncedMinute = -1;
+        let worker;
+
         const display = document.getElementById('display');
         const startMinInput = document.getElementById('startMin');
         const alarmInput = document.getElementById('alarmPoints');
         const waveBox = document.getElementById('waveBox');
+
+        // Audio senyap untuk mencegah HP membekukan browser saat layar mati
+        const silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==');
+        silentAudio.loop = true;
+
+        // Web Worker sebaris (inline) untuk pewaktuan yang lebih tangguh di latar belakang
+        const workerCode = `
+            let intervalId = null;
+            self.onmessage = function(e) {
+                if (e.data === 'start') {
+                    if (intervalId) clearInterval(intervalId);
+                    intervalId = setInterval(() => {
+                        self.postMessage('tick');
+                    }, 1000);
+                } else if (e.data === 'stop') {
+                    if (intervalId) {
+                        clearInterval(intervalId);
+                        intervalId = null;
+                    }
+                }
+            };
+        `;
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        worker = new Worker(URL.createObjectURL(blob));
+
+        worker.onmessage = function(e) {
+            if (e.data === 'tick') {
+                updateDisplay();
+            }
+        };
 
         function speak(text) {
             window.speechSynthesis.cancel(); // Bersihkan antrean suara
@@ -223,39 +258,54 @@
         }
 
         startMinInput.addEventListener('input', () => {
-            if (!timerInterval) {
+            if (startTime === 0) {
                 let m = parseInt(startMinInput.value) || 0;
                 display.innerText = `${m.toString().padStart(2, '0')}:00`;
             }
         });
 
         function startTimer() {
-            if (timerInterval) return;
+            if (startTime > 0) return; // Mencegah double start
+
+            // Mainkan audio senyap agar tidak tertidur
+            silentAudio.play().catch(e => console.log("Audio autoplay dicegah:", e));
 
             let startFrom = parseInt(startMinInput.value) || 0;
-            seconds = startFrom * 60;
+            startSeconds = startFrom * 60;
+            startTime = Date.now();
+            lastAnnouncedMinute = startFrom; // Cegah alarm pada detik ke-0 saat baru mulai
 
-            const targetMinutes = alarmInput.value.split(',').map(num => parseInt(num.trim()));
+            targetMinutes = alarmInput.value.split(',').map(num => parseInt(num.trim()));
             speak(`Timer dimulai dari menit ${startFrom}.`);
 
-            timerInterval = setInterval(() => {
-                seconds++;
+            worker.postMessage('start');
+            updateDisplay(); // Langsung perbarui tampilan
+        }
 
-                let mins = Math.floor(seconds / 60);
-                let secs = seconds % 60;
+        function updateDisplay() {
+            if (startTime === 0) return;
 
-                display.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            // Hitung detik berdasarkan waktu jam nyata (Date.now())
+            let elapsedSecs = Math.floor((Date.now() - startTime) / 1000);
+            seconds = startSeconds + elapsedSecs;
 
-                // Cek menit target
-                if (secs === 0 && targetMinutes.includes(mins)) {
-                    speak(`Woy! Sudah menit ke ${mins}!`);
-                }
-            }, 1000);
+            let mins = Math.floor(seconds / 60);
+            let secs = seconds % 60;
+
+            display.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+            // Cek alarm pada detik ke-0 (pergantian menit)
+            if (secs === 0 && targetMinutes.includes(mins) && lastAnnouncedMinute !== mins) {
+                lastAnnouncedMinute = mins;
+                speak(`Woy! Sudah menit ke ${mins}!`);
+            }
         }
 
         function stopTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
+            worker.postMessage('stop');
+            silentAudio.pause();
+            startTime = 0;
+            
             let startFrom = parseInt(startMinInput.value) || 0;
             seconds = startFrom * 60;
             display.innerText = `${startFrom.toString().padStart(2, '0')}:00`;
