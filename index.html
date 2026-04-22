@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -313,6 +313,139 @@
             window.speechSynthesis.cancel();
         }
     </script>
+
+</body>
+
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Terms & Conditions Pop-up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+    <script>
+        // Konfigurasi warna sesuai brand dashboard Anda
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#1e40af',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen" x-data="{ open: true }">
+
+    <button @click="open = true"
+        class="bg-secondary text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:bg-blue-900 transition-all">
+        Buka Terms & Conditions
+    </button>
+
+    <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
+        <div x-show="open" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+        <div x-show="open" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-95 translate-y-8"
+            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+            x-transition:leave-end="opacity-0 scale-95 translate-y-8" @click.away="open = false"
+            class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+
+            <div
+                class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-50 text-blue-600 p-2 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 leading-tight">Syarat & Ketentuan</h3>
+                        <p class="text-xs text-gray-400">Pembaruan: 22 April 2026</p>
+                    </div>
+                </div>
+                <button @click="open = false"
+                    class="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="px-6 py-4 overflow-y-auto text-sm text-gray-600 leading-relaxed space-y-4">
+                <p class="font-semibold text-gray-800">Halo! Sebelum melanjutkan ke Dashboard, mohon baca kebijakan
+                    kami:</p>
+
+                <section>
+                    <h4 class="font-bold text-gray-900 mb-1">1. Penggunaan Layanan</h4>
+                    <p>Aplikasi ini bertujuan untuk memantau kehadiran, nilai, dan administrasi siswa secara transparan.
+                        Anda bertanggung jawab menjaga kerahasiaan akun Anda.</p>
+                </section>
+
+                <section>
+                    <h4 class="font-bold text-gray-900 mb-1">2. Data Kehadiran</h4>
+                    <p>Data absensi diproses secara real-time. Jika terdapat ketidaksesuaian, harap segera hubungi
+                        bagian administrasi sekolah melalui menu kontak.</p>
+                </section>
+
+                <section>
+                    <h4 class="font-bold text-gray-900 mb-1">3. Pembayaran</h4>
+                    <p>Status "Unpaid" menunjukkan adanya tagihan yang belum terselesaikan. Silakan lakukan pembayaran
+                        sesuai instruksi di menu Payment untuk menghindari pemblokiran akses.</p>
+                </section>
+
+                <section>
+                    <h4 class="font-bold text-gray-900 mb-1">4. Hak Kekayaan Intelektual</h4>
+                    <p>Semua konten, logo, dan gambar pengumuman di aplikasi ini adalah milik U&I.
+                        Dilarang menyalahgunakan konten tanpa izin.</p>
+                </section>
+
+                <div class="p-3 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 text-xs italic">
+                    Dengan menekan tombol "Saya Setuju", Anda dianggap telah memberikan persetujuan penuh terhadap
+                    seluruh aturan di atas.
+                </div>
+            </div>
+
+            <div class="px-6 py-5 border-t border-gray-100 flex gap-3 bg-gray-50">
+                <button @click="open = false"
+                    class="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                    Nanti Saja
+                </button>
+                <button @click="open = false; alert('Terima kasih! Persetujuan Anda telah disimpan.')"
+                    class="flex-[2] px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-secondary to-primary rounded-xl shadow-md hover:opacity-90 active:scale-95 transition-all">
+                    Saya Setuju & Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
 
 </body>
 
