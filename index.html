@@ -1,335 +1,13 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chronos Pro - Double Voice</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        body {
-            background: radial-gradient(circle at center, #1a1a2e 0%, #0c0c16 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            padding: 20px;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2.5rem 2rem;
-            border-radius: 30px;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
-            text-align: center;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        h2 {
-            font-weight: 300;
-            letter-spacing: 4px;
-            font-size: clamp(0.7rem, 2vw, 0.8rem);
-            margin-bottom: 10px;
-            color: #00d4ff;
-            text-transform: uppercase;
-        }
-
-        #display {
-            font-size: clamp(4rem, 15vw, 6rem);
-            font-weight: 700;
-            margin: 0.5rem 0;
-            background: linear-gradient(to bottom, #ffffff 30%, #444 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .input-row {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin: 25px 0;
-        }
-
-        .input-group {
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            font-size: 0.65rem;
-            margin-left: 10px;
-            margin-bottom: 5px;
-            opacity: 0.5;
-            letter-spacing: 1px;
-        }
-
-        input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 12px;
-            border-radius: 15px;
-            color: white;
-            width: 100%;
-            text-align: center;
-            font-size: 1rem;
-            outline: none;
-            transition: 0.4s;
-        }
-
-        input:focus {
-            border-color: #00d4ff;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-container {
-            display: flex;
-            gap: 12px;
-        }
-
-        button {
-            flex: 1;
-            padding: 15px;
-            border-radius: 18px;
-            border: none;
-            cursor: pointer;
-            font-weight: 700;
-            transition: 0.3s;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-        }
-
-        .btn-start {
-            background: #00d4ff;
-            color: #000;
-            box-shadow: 0 10px 20px rgba(0, 212, 255, 0.2);
-        }
-
-        .btn-start:active {
-            transform: scale(0.95);
-        }
-
-        .btn-stop {
-            background: rgba(255, 255, 255, 0.05);
-            color: #ff4b2b;
-            border: 1px solid rgba(255, 75, 43, 0.3);
-        }
-
-        .btn-stop:active {
-            transform: scale(0.95);
-        }
-
-        .wave-container {
-            display: none;
-            height: 30px;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-            margin-top: 20px;
-        }
-
-        .wave {
-            width: 3px;
-            height: 10px;
-            background: #00d4ff;
-            border-radius: 10px;
-            animation: wave-anim 1s infinite;
-        }
-
-        @keyframes wave-anim {
-
-            0%,
-            100% {
-                height: 100%;
-            }
-
-            50% {
-                height: 40%;
-            }
-        }
-
-        @media (min-width: 480px) {
-            .input-row {
-                flex-direction: row;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="container">
-        <h2>Chronos Double Voice</h2>
-        <div id="display">00:00</div>
-
-        <div class="input-row">
-            <div class="input-group">
-                <label>MULAI DARI (MENIT)</label>
-                <input type="number" id="startMin" value="0" placeholder="0">
-            </div>
-            <div class="input-group">
-                <label>ALARM PADA (MENIT)</label>
-                <input type="text" id="alarmPoints" placeholder="Cont: 1, 5, 10">
-            </div>
-        </div>
-
-        <div class="btn-container">
-            <button class="btn-start" onclick="startTimer()">START</button>
-            <button class="btn-stop" onclick="stopTimer()">RESET</button>
-        </div>
-
-        <div class="wave-container" id="waveBox">
-            <div class="wave"></div>
-            <div class="wave"></div>
-            <div class="wave"></div>
-            <span style="font-size: 0.7rem; margin-left: 10px; color: #00d4ff;">Google Berbicara...</span>
-        </div>
-    </div>
-
-    <script>
-        let seconds = 0;
-        let startTime = 0;
-        let startSeconds = 0;
-        let targetMinutes = [];
-        let lastAnnouncedMinute = -1;
-        let worker;
-
-        const display = document.getElementById('display');
-        const startMinInput = document.getElementById('startMin');
-        const alarmInput = document.getElementById('alarmPoints');
-        const waveBox = document.getElementById('waveBox');
-
-        // Audio senyap untuk mencegah HP membekukan browser saat layar mati
-        const silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==');
-        silentAudio.loop = true;
-
-        // Web Worker sebaris (inline) untuk pewaktuan yang lebih tangguh di latar belakang
-        const workerCode = `
-            let intervalId = null;
-            self.onmessage = function(e) {
-                if (e.data === 'start') {
-                    if (intervalId) clearInterval(intervalId);
-                    intervalId = setInterval(() => {
-                        self.postMessage('tick');
-                    }, 1000);
-                } else if (e.data === 'stop') {
-                    if (intervalId) {
-                        clearInterval(intervalId);
-                        intervalId = null;
-                    }
-                }
-            };
-        `;
-        const blob = new Blob([workerCode], { type: 'application/javascript' });
-        worker = new Worker(URL.createObjectURL(blob));
-
-        worker.onmessage = function(e) {
-            if (e.data === 'tick') {
-                updateDisplay();
-            }
-        };
-
-        function speak(text) {
-            window.speechSynthesis.cancel(); // Bersihkan antrean suara
-
-            // Buat kalimat untuk diulang 2 kali
-            const repeatedText = `${text}. Sekali lagi. ${text}`;
-
-            const msg = new SpeechSynthesisUtterance();
-            msg.text = repeatedText;
-            msg.lang = 'id-ID';
-            msg.rate = 1.0;
-
-            waveBox.style.display = 'flex';
-            msg.onend = () => { waveBox.style.display = 'none'; };
-            window.speechSynthesis.speak(msg);
-        }
-
-        startMinInput.addEventListener('input', () => {
-            if (startTime === 0) {
-                let m = parseInt(startMinInput.value) || 0;
-                display.innerText = `${m.toString().padStart(2, '0')}:00`;
-            }
-        });
-
-        function startTimer() {
-            if (startTime > 0) return; // Mencegah double start
-
-            // Mainkan audio senyap agar tidak tertidur
-            silentAudio.play().catch(e => console.log("Audio autoplay dicegah:", e));
-
-            let startFrom = parseInt(startMinInput.value) || 0;
-            startSeconds = startFrom * 60;
-            startTime = Date.now();
-            lastAnnouncedMinute = startFrom; // Cegah alarm pada detik ke-0 saat baru mulai
-
-            targetMinutes = alarmInput.value.split(',').map(num => parseInt(num.trim()));
-            speak(`Timer dimulai dari menit ${startFrom}.`);
-
-            worker.postMessage('start');
-            updateDisplay(); // Langsung perbarui tampilan
-        }
-
-        function updateDisplay() {
-            if (startTime === 0) return;
-
-            // Hitung detik berdasarkan waktu jam nyata (Date.now())
-            let elapsedSecs = Math.floor((Date.now() - startTime) / 1000);
-            seconds = startSeconds + elapsedSecs;
-
-            let mins = Math.floor(seconds / 60);
-            let secs = seconds % 60;
-
-            display.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-
-            // Cek alarm pada detik ke-0 (pergantian menit)
-            if (secs === 0 && targetMinutes.includes(mins) && lastAnnouncedMinute !== mins) {
-                lastAnnouncedMinute = mins;
-                speak(`Woy! Sudah menit ke ${mins}!`);
-            }
-        }
-
-        function stopTimer() {
-            worker.postMessage('stop');
-            silentAudio.pause();
-            startTime = 0;
-            
-            let startFrom = parseInt(startMinInput.value) || 0;
-            seconds = startFrom * 60;
-            display.innerText = `${startFrom.toString().padStart(2, '0')}:00`;
-            waveBox.style.display = 'none';
-            window.speechSynthesis.cancel();
-        }
-    </script>
-
-</body>
-
-</html> -->
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demo Terms & Conditions Pop-up</title>
+    <title>Terms of Service - U&I English Course</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -338,111 +16,486 @@
         [x-cloak] {
             display: none !important;
         }
-    </style>
-    <script>
-        // Konfigurasi warna sesuai brand dashboard Anda
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3b82f6',
-                        secondary: '#1e40af',
-                    }
-                }
-            }
+
+        /* Custom Scrollbar */
+        .content-scroll::-webkit-scrollbar {
+            width: 6px;
         }
-    </script>
+
+        .content-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .content-scroll::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .content-scroll::-webkit-scrollbar-thumb:hover {
+            background: #cbd5e1;
+        }
+
+        /* Indentasi List agar Rapi */
+        .term-item {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+
+        .term-letter {
+            font-weight: 700;
+            color: #1e40af;
+            min-width: 1.5rem;
+        }
+
+        .term-text {
+            flex: 1;
+            text-align: justify;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100 flex items-center justify-center min-h-screen" x-data="{ open: true }">
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4" x-data="{ open: true, agreed: false }">
 
     <button @click="open = true"
-        class="bg-secondary text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:bg-blue-900 transition-all">
-        Buka Terms & Conditions
+        class="bg-blue-700 hover:bg-blue-800 text-white px-8 py-3.5 rounded-2xl font-bold shadow-2xl shadow-blue-200 transition-all active:scale-95">
+        Lihat Syarat & Ketentuan
     </button>
 
-    <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
-        <div x-show="open" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md" @click="open = false"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"></div>
 
         <div x-show="open" x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 scale-95 translate-y-8"
+            x-transition:enter-start="opacity-0 scale-95 translate-y-10"
             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-            x-transition:leave-end="opacity-0 scale-95 translate-y-8" @click.away="open = false"
-            class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+            class="relative bg-white w-full max-w-4xl rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex flex-col max-h-[90vh] overflow-hidden border border-white">
 
             <div
-                class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
-                <div class="flex items-center gap-3">
-                    <div class="bg-blue-50 text-blue-600 p-2 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                class="relative px-8 py-7 border-b border-slate-100 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-20">
+                <div class="flex items-center gap-5">
+                    <div
+                        class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200 rotate-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900 leading-tight">Syarat & Ketentuan</h3>
-                        <p class="text-xs text-gray-400">Pembaruan: 22 April 2026</p>
+                        <h2 class="text-xl font-extrabold text-slate-800 tracking-tight leading-none uppercase">Syarat &
+                            Ketentuan Layanan</h2>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="h-px w-8 bg-blue-300"></span>
+                            <p
+                                class="text-[11px] text-blue-600 font-extrabold tracking-[0.3em] uppercase leading-none italic">
+                                U&I English Course</p>
+                        </div>
                     </div>
                 </div>
-                <button @click="open = false"
-                    class="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-full transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                <button @click="open = false" class="group p-2 hover:bg-slate-100 rounded-full transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400 group-hover:text-slate-600"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
-            <div class="px-6 py-4 overflow-y-auto text-sm text-gray-600 leading-relaxed space-y-4">
-                <p class="font-semibold text-gray-800">Halo! Sebelum melanjutkan ke Dashboard, mohon baca kebijakan
-                    kami:</p>
+            <div class="content-scroll flex-1 overflow-y-auto px-8 py-10 md:px-16 space-y-5">
+
+                <style>
+                    .section-title {
+                        font-size: 0.875rem;
+                        font-weight: 800;
+                        color: #1e3a8a;
+                        letter-spacing: 0.1em;
+                        display: flex;
+                        items-center: center;
+                        gap: 0.5rem;
+                        margin-bottom: 1.5rem;
+                        text-transform: uppercase;
+                    }
+
+                    .section-title::before {
+                        content: "";
+                        width: 4px;
+                        height: 16px;
+                        background: #2563eb;
+                        border-radius: 99px;
+                    }
+                </style>
 
                 <section>
-                    <h4 class="font-bold text-gray-900 mb-1">1. Penggunaan Layanan</h4>
-                    <p>Aplikasi ini bertujuan untuk memantau kehadiran, nilai, dan administrasi siswa secara transparan.
-                        Anda bertanggung jawab menjaga kerahasiaan akun Anda.</p>
+                    <h3 class="section-title">I. AKADEMIK & OPERASIONAL</h3>
+                    <div class="text-sm text-slate-600 leading-relaxed">
+                        <div class="term-item"><span class="term-letter">a)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">Penempatan Level:</span>
+                                Tingkatan kelas yang ditentukan berdasarkan hasil placement test awal bersifat final.
+                                Segala bentuk perpindahan ke tingkat yang lebih tinggi wajib mengikuti prosedur resmi
+                                jump level yang telah ditetapkan oleh U&I ENGLISH COURSE.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">b)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">Kebijakan Bahasa (Full English
+                                    Policy):</span> Seluruh proses belajar-mengajar di U&I ENGLISH COURSE dilaksanakan
+                                sepenuhnya menggunakan bahasa Inggris (Full English). Siswa/i diwajibkan untuk
+                                berkomunikasi dengan menggunakan Bahasa Inggris kepada guru dan staff selama berada di
+                                area U&I ENGLISH COURSE. U&I ENGLISH COURSE tidak menerapkan metode pembelajaran
+                                bilingual atau penggunaan dua bahasa dalam instruksi kelas maupun penyampaian materi
+                                akademiknya.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">c)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">Kalender Akademik &
+                                    Event:</span> Orang tua/wali dan siswa/i menyatakan setuju untuk mengikuti seluruh
+                                ketetapan kalender akademik, termasuk hari libur lembaga serta seluruh acara resmi yang
+                                diselenggarakan oleh U&I ENGLISH COURSE.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">d)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">Kewajiban Penggunaan Aplikasi
+                                    Portal:</span> Seluruh orang tua/wali wajib menggunakan aplikasi portal resmi U&I
+                                ENGLISH COURSE sebagai pusat informasi utama yang mencakup kalender akademik, kehadiran,
+                                nilai, tagihan, dan bukti pembayaran elektronik (e-receipt). Demi efisiensi,
+                                administrasi U&I ENGLISH COURSE tidak melayani penyampaian informasi rutin tersebut
+                                secara manual atau personal. U&I ENGLISH COURSE tidak bertanggung jawab atas
+                                ketertinggalan informasi yang disebabkan oleh kelalaian orang tua/wali dalam mengecek
+                                aplikasi secara berkala, kecuali dalam hal penyampaian informasi darurat yang mendadak
+                                atau apabila sedang terjadi gangguan teknis pada sistem aplikasi U&I ENGLISH COURSE.
+                            </div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">e)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">Penggantian Pengajar:</span>
+                                Apabila guru utama berhalangan hadir, pihak lembaga akan selalu menugaskan pengajar
+                                pengganti (substitute teacher) sehingga kegiatan kelas dipastikan tetap berjalan normal
+                                sesuai jadwal tanpa adanya pembatalan sepihak dari U&I ENGLISH COURSE.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">f)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">Durasi & Transisi
+                                    Kelas:</span> Guna memastikan kelancaran waktu transisi antar kelas, kelas dengan
+                                durasi 1 jam akan diakhiri 5 menit lebih awal, sedangkan kelas berdurasi 2 jam akan
+                                diakhiri 10 menit lebih awal. Waktu tersebut didedikasikan sepenuhnya sebagai masa
+                                transisi pengajar agar kelas selanjutnya dapat dipersiapkan dan dimulai tepat pada
+                                waktunya.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">g)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">Acara Khusus (Special
+                                    Events):</span> Sebagai sarana pembelajaran interaktif, U&I ENGLISH COURSE
+                                menyelenggarakan acara khusus maksimal 3 kali setahun dengan alokasi waktu kelas selama
+                                kurang lebih 1 jam. Siswa Reguler otomatis berpartisipasi dan ketidakhadiran atau
+                                ketidakikutsertaan siswa/i dalam acara ini tidak dapat diuangkan (refund) maupun diganti
+                                dengan kelas lain. Sedangkan siswa Privat tidak diwajibkan mengikuti namun wajib
+                                memberikan konfirmasi kehadiran terlebih dahulu jika ingin berpartisipasi.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">h)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">Kebijakan Poin:</span> Poin
+                                yang sudah ditukarkan dengan souvenir tidak dapat dikembalikan (non-refundable) dalam
+                                bentuk poin maupun uang tunai.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">i)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">Klaim Poin Prestasi
+                                    (Achievement Points):</span> Siswa/i dapat mengajukan poin tambahan untuk prestasi
+                                Bahasa Inggris di luar lembaga dengan menyerahkan bukti fisik asli (kertas ulangan
+                                harian, sumatif, ulangan tengah semester, ulangan akhir resmi sekolah atau sertifikat
+                                lomba) maksimal 3 bulan sejak tanggal prestasi yang tertera. Perlu diperhatikan bahwa
+                                klaim poin hanya berlaku untuk prestasi yang diraih setelah siswa/i berstatus aktif
+                                sebagai murid U&I ENGLISH COURSE, sehingga segala bentuk prestasi yang diperoleh sebelum
+                                tanggal pendaftaran resmi tidak dapat diklaim.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">j)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">Rekomendasi & Kalibrasi
+                                    Tingkat Akademik:</span> Apabila hasil observasi guru menunjukkan ketidaksiapan
+                                siswa/i untuk naik ke tingkat selanjutnya, U&I ENGLISH COURSE akan memberikan
+                                rekomendasi level yang sesuai; namun jika orang tua/wali tetap menghendaki kenaikan
+                                tingkat, pemantauan dilakukan hingga pelaksanaan Test 1, di mana jika nilai tidak
+                                mencapai KKM maka siswa/i akan direkomendasikan kembali untuk pindah level, dan apabila
+                                tetap ditolak, maka segala risiko kegagalan atau ketidaktuntasan akademik di akhir
+                                tingkat tersebut sepenuhnya menjadi tanggung jawab mandiri orang tua/wali.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">k)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">Prosedur Loncat Tingkat (Jump
+                                    Level):</span> Fasilitas jump level hanya diperbolehkan maksimal sebanyak 2 (dua)
+                                kali per murid selama masa pendidikan di U&I ENGLISH COURSE. Sebelum proses jump level
+                                diadakan, harus mendapatkan rekomendasi dari guru kelas serta persetujuan resmi dari
+                                pihak manajemen U&I ENGLISH COURSE. Batasan 2 kali tersebut hanya diperbolehkan 1 kali
+                                di setiap kategori tingkatan level. Jika permohonan jump level disetujui dan tes telah
+                                dilaksanakan, maka hasil dari tes jump level tersebut bersifat mutlak serta final.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">l)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">[Kelas Privat] Karakteristik
+                                    Kelas:</span> Program kelas privat tidak menyelenggarakan ujian (test) dan tidak
+                                menyediakan sertifikat kelulusan bagi siswa/i.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">m)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">[Kelas Privat] Prioritas Jam
+                                    Operasional:</span> Rentang waktu Senin–Jumat pukul 15.00–19.00 dan Sabtu pukul
+                                08.00–14.00 diprioritaskan secara mutlak untuk Kelas Reguler. Penempatan Kelas Privat
+                                pada rentang waktu tersebut bersifat kondisional, di mana U&I ENGLISH COURSE berhak
+                                penuh untuk memindahkan jadwal Kelas Privat ke slot waktu lain apabila ketersediaan
+                                pengajar dan ruangan pada jam tersebut dibutuhkan untuk Kelas Reguler.</div>
+                        </div>
+                    </div>
                 </section>
 
                 <section>
-                    <h4 class="font-bold text-gray-900 mb-1">2. Data Kehadiran</h4>
-                    <p>Data absensi diproses secara real-time. Jika terdapat ketidaksesuaian, harap segera hubungi
-                        bagian administrasi sekolah melalui menu kontak.</p>
+                    <h3 class="section-title">II. KETENTUAN PEMBAYARAN & BIAYA</h3>
+                    <div class="text-sm text-slate-600 leading-relaxed">
+                        <div class="term-item"><span class="term-letter">a)</span>
+                            <div class="term-text">Penggunaan Promosi: Promosi pendaftaran yang berlaku hanya
+                                diperuntukkan bagi calon siswa/i yang belum pernah terdaftar di U&I ENGLISH COURSE.
+                            </div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">b)</span>
+                            <div class="term-text">Ketentuan Hari Libur: Biaya SPP bulanan bersifat tetap dan tidak ada
+                                pengurangan harga meskipun terdapat libur panjang, seperti libur Lebaran, atau libur
+                                akhir tahun, sesuai dengan kalender akademik yang telah ditetapkan U&I ENGLISH COURSE.
+                            </div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">c)</span>
+                            <div class="term-text">Pembayaran di Muka & Kebijakan Refund: Pembayaran SPP di muka (in
+                                advance) dibatasi maksimum untuk jangka waktu 3 (tiga) bulan. Jika siswa/i berhenti di
+                                tengah periode tersebut, pengembalian dana (refund) hanya diberikan untuk bulan-bulan
+                                yang belum berjalan yang akan diproses maksimal dalam 7 hari kerja. Biaya untuk bulan
+                                yang sedang berjalan atau sudah berjalan dianggap hangus dan tidak dapat dikembalikan.
+                            </div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">d)</span>
+                            <div class="term-text">Periode Pembayaran & Pengingat: Biaya kursus bulanan (SPP) sangat
+                                disarankan untuk dilunasi pada tanggal 1–10 setiap bulannya. Administrasi akan
+                                mengirimkan pengingat pertama (first reminder) pada tanggal 11 dan pengingat kedua
+                                (second reminder) pada tanggal 16 setiap bulannya. Apabila tanggal tersebut bertepatan
+                                dengan hari libur, pengingat akan dikirimkan pada hari kerja berikutnya.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">e)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">[Kelas Reguler] Ketentuan
+                                    Denda:</span> Untuk Kelas Reguler, pembayaran yang dilakukan mulai tanggal 21 ke
+                                atas dikenakan denda administratif sebesar 10% dari biaya SPP per siswa/i secara mutlak
+                                meskipun bertepatan dengan hari libur.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">f)</span>
+                            <div class="term-text">Penangguhan Belajar: Jika tagihan belum lunas hingga akhir bulan
+                                berjalan, siswa/i tidak diperkenankan mengikuti kelas mulai tanggal 1 pada bulan
+                                berikutnya. Seluruh tunggakan tetap wajib dilunasi sebagai syarat sah pengunduran diri
+                                dari U&I ENGLISH COURSE.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">g)</span>
+                            <div class="term-text">Penyesuaian Tarif SPP: Biaya kursus bulanan (SPP) mengacu pada tarif
+                                resmi yang sedang berlaku. Tarif ini pada dasarnya bersifat stabil. Namun, guna menjaga
+                                kualitas pendidikan dalam jangka panjang, U&I ENGLISH COURSE dapat melakukan penyesuaian
+                                harga pada tahun ajaran tertentu. Apabila terdapat perubahan tarif di masa depan,
+                                informasi resmi akan disampaikan selambat-lambatnya 1 (satu) bulan sebelum kebijakan
+                                tersebut diterapkan.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">h)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">[Kelas Privat] Ketentuan
+                                    Denda:</span> Untuk semua program Kelas Privat, pembayaran yang dilakukan mulai
+                                tanggal 1 pada bulan berikutnya dikenakan denda administratif sebesar 5% dari biaya SPP
+                                per siswa/i secara mutlak meskipun bertepatan dengan hari libur.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">i)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">[Kelas Privat] Diskon
+                                    Pembayaran:</span> Tersedia potongan biaya sebesar 5% khusus untuk kelas privat yang
+                                dilunasi pada rentang tanggal 1–10 setiap bulannya, namun diskon ini tidak berlaku untuk
+                                program TOEIC, TOEFL, IELTS, dan kelas Irregular.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">j)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">[Kelas Privat] Sesi
+                                    Tambahan:</span> Penambahan jam kelas privat di luar jadwal semula (Irregular
+                                Private) dikenakan biaya tambahan sebesar Rp 120.000,- per jam.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">k)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">[Kelas Privat] Ketentuan
+                                    Presensi Rendah:</span> Apabila total kehadiran siswa kelas privat dalam dua bulan
+                                berturut-turut kurang dari 50%, maka U&I ENGLISH COURSE berhak mencabut slot waktu (hari
+                                & jam) tetap siswa/i tersebut dan mengalihkannya untuk siswa/i lain. Siswa/i yang
+                                bersangkutan wajib mengatur ulang jadwal baru yang menyesuaikan dengan ketersediaan
+                                pengajar.</div>
+                        </div>
+                    </div>
                 </section>
 
                 <section>
-                    <h4 class="font-bold text-gray-900 mb-1">3. Pembayaran</h4>
-                    <p>Status "Unpaid" menunjukkan adanya tagihan yang belum terselesaikan. Silakan lakukan pembayaran
-                        sesuai instruksi di menu Payment untuk menghindari pemblokiran akses.</p>
+                    <h3 class="section-title">III. KEHADIRAN, JADWAL & FORMAT KELAS</h3>
+                    <div class="text-sm text-slate-600 leading-relaxed">
+                        <div class="term-item"><span class="term-letter">a)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">[Kelas Reguler] Ketentuan
+                                    Absensi:</span> Karena sistem pendidikan U&I ENGLISH COURSE berbasis kurikulum
+                                terjadwal, tidak disediakan kelas pengganti (make-up class) apabila siswa/i kelas
+                                reguler berhalangan hadir dengan alasan apa pun.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">b)</span>
+                            <div class="term-text">Kriteria Kehadiran Siswa: Siswa/i dinyatakan hadir (present) apabila
+                                berada di dalam ruang kelas serta mengikuti seluruh rangkaian kegiatan belajar-mengajar
+                                secara aktif dari awal hingga akhir sesi.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">c)</span>
+                            <div class="term-text">Kebijakan Penggunaan Gawai: Demi menjaga suasana belajar yang
+                                kondusif, guru memiliki wewenang untuk menyimpan sementara gawai (smartphone/tablet)
+                                milik siswa/i yang tetap menggunakan perangkat tersebut setelah diberikan 3 (tiga) kali
+                                peringatan lisan, dan gawai tersebut akan dikembalikan segera setelah sesi kelas
+                                berakhir.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">d)</span>
+                            <div class="term-text">Batas Tanggung Jawab Penjemputan: U&I ENGLISH COURSE resmi tutup pada
+                                pukul 20.00 (Senin–Jumat) dan pukul 14.00 (Sabtu). Apabila terjadi keterlambatan
+                                penjemputan saat gerbang utama sudah harus ditutup, staf U&I ENGLISH COURSE hanya
+                                memiliki tanggung jawab untuk menemani siswa/i di luar gedung maksimal selama 15 (lima
+                                belas) menit setelah jam tutup. Lebih dari durasi tersebut, keamanan dan keselamatan
+                                siswa/i di luar area gedung sepenuhnya merupakan tanggung jawab orang tua/wali.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">e)</span>
+                            <div class="term-text">Pendampingan Orang Tua (Pretoddle 1 – Toddle 1): Khusus bagi siswa/i
+                                tingkat Pretoddle 1 hingga Toddle 1, orang tua atau wali sangat direkomendasikan untuk
+                                mendampingi di dalam kelas hingga siswa/i dinilai mandiri oleh guru guna membantu
+                                kebutuhan personal siswa/i yang berada di luar kapasitas instruksional guru demi menjaga
+                                kelancaran proses belajar bagi seluruh siswa.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">f)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">[Kelas Privat] Ketentuan
+                                    Pembatalan:</span> Pembatalan jadwal (cancellation) yang dilakukan dalam waktu
+                                kurang dari 3 (tiga) jam sebelum kelas dimulai karena alasan atau kondisi apa pun akan
+                                tetap dihitung sebagai sesi hangus (charge) dan biaya sesi tetap dikenakan secara penuh,
+                                kecuali terdapat ketetapan force majeure yang dinyatakan secara resmi oleh U&I ENGLISH
+                                COURSE.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">g)</span>
+                            <div class="term-text"><span class="font-bold text-slate-800">[Kelas Privat] Perubahan
+                                    Format:</span> Siswa/i yang terdaftar dalam program Kelas Privat tatap muka
+                                (offline) tidak diperbolehkan untuk mengubah format pembelajaran menjadi daring (online)
+                                dalam kondisi apa pun, dan larangan ini bersifat mutlak serta tidak terikat dengan
+                                ketentuan batas waktu pembatalan jadwal, kecuali terdapat ketetapan force majeure yang
+                                dinyatakan secara resmi oleh U&I ENGLISH COURSE.</div>
+                        </div>
+                    </div>
                 </section>
 
                 <section>
-                    <h4 class="font-bold text-gray-900 mb-1">4. Hak Kekayaan Intelektual</h4>
-                    <p>Semua konten, logo, dan gambar pengumuman di aplikasi ini adalah milik U&I.
-                        Dilarang menyalahgunakan konten tanpa izin.</p>
+                    <h3 class="section-title">IV. FASILITAS, KEAMANAN & SISTEM POIN</h3>
+                    <div class="text-sm text-slate-600 leading-relaxed">
+                        <div class="term-item"><span class="term-letter">a)</span>
+                            <div class="term-text">Ketentuan Buku Pelajaran: Siswa/i hanya diperbolehkan untuk membeli
+                                buku sesuai dengan program yang diikuti saat itu. Orang tua atau siswa/i tidak
+                                diperkenankan untuk menggunakan buku bekas maupun membeli buku untuk level lain di luar
+                                program aktif guna mencegah penyalahgunaan materi pembelajaran dan menjaga standar
+                                kualitas pendidikan U&I ENGLISH COURSE.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">b)</span>
+                            <div class="term-text">Privasi & Komunikasi Staf: Orang tua/wali tidak diperbolehkan untuk
+                                meminta nomor kontak pribadi, akun media sosial, atau jalur komunikasi pribadi lainnya
+                                milik guru maupun staf U&I ENGLISH COURSE. Seluruh komunikasi terkait akademik maupun
+                                administrasi wajib dilakukan melalui jalur komunikasi resmi lembaga. Pelanggaran akan
+                                dikenakan sanksi sesuai dengan prosedur yang berlaku.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">c)</span>
+                            <div class="term-text">Larangan Transaksi Komersial: Siswa/i, orang tua, maupun wali murid
+                                dilarang melakukan aktivitas jual-beli dan promosi barang atau jasa dalam bentuk apa pun
+                                di dalam gedung U&I ENGLISH COURSE kecuali penitipan penjualan makanan/ minuman yang
+                                disetujui oleh pihak kantin.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">d)</span>
+                            <div class="term-text">Tanggung Jawab Fasilitas: Siswa/i, orang tua, maupun wali murid
+                                bersedia menanggung biaya perbaikan atau penggantian jika siswa/i terbukti merusak
+                                properti atau fasilitas U&I ENGLISH COURSE akibat kelalaian maupun kesengajaan. Segala
+                                bentuk biaya parkir yang ditagih oleh pihak eksternal di sekitar area lembaga berada
+                                sepenuhnya di luar tanggung jawab U&I ENGLISH COURSE.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">e)</span>
+                            <div class="term-text">Barang Tertinggal (Lost and Found): Barang yang tertinggal di area
+                                lembaga akan disimpan dalam kategori Lost and Found. Siswa/i atau orang tua yang ingin
+                                mengklaim barang wajib memberikan informasi identitas pengambil yang lengkap kepada
+                                administrasi. Apabila barang tidak diklaim hingga pergantian tahun, maka barang tersebut
+                                sepenuhnya menjadi hak U&I ENGLISH COURSE untuk didonasikan kepada pihak luar.</div>
+                        </div>
+                        <div class="term-item"><span class="term-letter">f)</span>
+                            <div class="term-text">Pengawasan CCTV: Demi menjamin keamanan dan keselamatan, U&I ENGLISH
+                                COURSE mengoperasikan sistem CCTV di seluruh area gedung dan ruang kelas. Seluruh data
+                                rekaman bersifat rahasia dan merupakan hak milik eksklusif internal pengelola. Orang
+                                tua/wali tidak diperkenankan meminta salinan (copy) rekaman, dan peninjauan rekaman
+                                hanya dapat dilakukan di bawah pengawasan langsung manajemen jika terjadi keadaan
+                                darurat yang mendesak.</div>
+                        </div>
+                    </div>
                 </section>
 
-                <div class="p-3 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 text-xs italic">
-                    Dengan menekan tombol "Saya Setuju", Anda dianggap telah memberikan persetujuan penuh terhadap
-                    seluruh aturan di atas.
-                </div>
+                <section class="space-y-12">
+                    <div>
+                        <h3 class="section-title">V. STATUS NON-AKTIF & PENDAFTARAN ULANG</h3>
+                        <div class="text-sm text-slate-600 leading-relaxed">
+                            <div class="term-item"><span class="term-letter">a)</span>
+                                <div class="term-text">Kriteria Non-Aktif: Siswa/i otomatis dianggap berhenti
+                                    (non-aktif) apabila absen tanpa kabar selama 1 (satu) bulan penuh, atau memiliki
+                                    tunggakan pembayaran yang melewati batas akhir bulan berjalan.</div>
+                            </div>
+                            <div class="term-item"><span class="term-letter">b)</span>
+                                <div class="term-text">Kewajiban Tunggakan: Seluruh tunggakan tetap wajib dilunasi
+                                    sebagai syarat sah pengunduran diri dari U&I ENGLISH COURSE. Siswa/i yang masih
+                                    memiliki tunggakan tidak diperbolehkan bergabung kembali sampai seluruh kewajiban
+                                    tersebut dilunasi.</div>
+                            </div>
+                            <div class="term-item"><span class="term-letter">c)</span>
+                                <div class="term-text">Prosedur Daftar Ulang: Siswa yang sudah berstatus non-aktif dan
+                                    ingin kembali bergabung wajib mengikuti prosedur pendaftaran. Siswa yang berhenti
+                                    dalam kurun waktu 1-3 bulan wajib membayar biaya pendaftaran. Siswa yang berhenti
+                                    lebih dari 3 bulan wajib mengikuti tes penempatan (placement test) ulang dan
+                                    membayar biaya pendaftaran.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="section-title">VI. KETENTUAN UMUM & HAK LEMBAGA</h3>
+                        <div class="text-sm text-slate-600 leading-relaxed">
+                            <div class="term-item"><span class="term-letter">a)</span>
+                                <div class="term-text">Hak Penolakan Layanan: U&I ENGLISH COURSE berhak penuh untuk
+                                    menolak atau menghentikan layanan pendidikan apabila terjadi pelanggaran ketentuan,
+                                    ketidaksepahaman serius dengan orang tua/wali, atau jika siswa dinilai membutuhkan
+                                    penanganan khusus (special needs) yang berada di luar kapasitas, kualifikasi, dan
+                                    fasilitas tenaga pendidik U&I ENGLISH COURSE.</div>
+                            </div>
+                            <div class="term-item"><span class="term-letter">b)</span>
+                                <div class="term-text">Keadaan Memaksa (Force Majeure): Dalam situasi darurat di luar
+                                    kendali lembaga (force majeure), format pembelajaran akan dialihkan dari tatap muka
+                                    (offline) menjadi daring (online). Perubahan darurat ini tidak memunculkan kewajiban
+                                    pengembalian dana (refund) kepada pihak siswa/i.</div>
+                            </div>
+                            <div class="term-item"><span class="term-letter">c)</span>
+                                <div class="term-text">Pembaruan Aturan: U&I ENGLISH COURSE berhak menyesuaikan
+                                    peraturan di masa mendatang. Setiap perubahan akan diinformasikan sebelumnya, dan
+                                    melanjutkan penggunaan jasa U&I ENGLISH COURSE dianggap sebagai bentuk persetujuan
+                                    terhadap aturan baru.</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
 
-            <div class="px-6 py-5 border-t border-gray-100 flex gap-3 bg-gray-50">
-                <button @click="open = false"
-                    class="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                    Nanti Saja
-                </button>
-                <button @click="open = false; alert('Terima kasih! Persetujuan Anda telah disimpan.')"
-                    class="flex-[2] px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-secondary to-primary rounded-xl shadow-md hover:opacity-90 active:scale-95 transition-all">
-                    Saya Setuju & Lanjutkan
-                </button>
+            <div class="px-8 py-8 border-t border-slate-100 bg-slate-50/50 backdrop-blur-md rounded-b-[2.5rem]">
+                <label
+                    class="flex items-start gap-4 mb-8 cursor-pointer group p-5 bg-white rounded-3xl border border-slate-100 shadow-sm transition-all hover:border-blue-200">
+                    <div class="flex items-center h-6">
+                        <input type="checkbox" x-model="agreed"
+                            class="w-6 h-6 rounded-lg border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer transition-all">
+                    </div>
+                    <span class="text-[13px] text-slate-600 font-semibold leading-relaxed group-hover:text-slate-900">
+                        Saya menyatakan bahwa seluruh data yang diisi adalah benar, serta saya selaku Orang
+                        Tua/Wali/Siswa/i telah membaca dan menyetujui Syarat & Ketentuan Layanan <span
+                            class="text-blue-700 underline decoration-blue-200 underline-offset-4">U&I ENGLISH
+                            COURSE</span>.
+                    </span>
+                </label>
+
+                <div class="flex gap-4">
+                    <button @click="open = false"
+                        class="flex-1 px-8 py-4 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-white rounded-2xl transition-all active:scale-95">
+                        Tutup
+                    </button>
+                    <button :disabled="!agreed" @click="alert('Persetujuan Berhasil.'); open = false"
+                        :class="agreed ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-100' : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'"
+                        class="flex-[2.5] px-8 py-4 text-sm font-black rounded-2xl transition-all active:scale-95 uppercase tracking-widest">
+                        Setuju & Lanjutkan
+                    </button>
+                </div>
             </div>
         </div>
     </div>
